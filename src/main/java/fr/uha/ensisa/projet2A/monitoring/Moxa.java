@@ -3,6 +3,8 @@ package fr.uha.ensisa.projet2A.monitoring;
 import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
+
 import net.wimpi.modbus.io.ModbusTCPTransaction;
 import net.wimpi.modbus.msg.ReadInputDiscretesRequest;
 import net.wimpi.modbus.msg.ReadInputDiscretesResponse;
@@ -28,20 +30,21 @@ public class Moxa {
 		ArrayList<MachineUpdate> updates = new ArrayList<MachineUpdate>();
 		for (int i = 0; i < IPs.length; i++) {
 			InetAddress inet = InetAddress.getByName(IPs[i]);
+			
+			int state = -1;
 
 			if (inet.isReachable(3000)) {
 
 				connection = new TCPMasterConnection(inet);
 				connection.setPort(port);
 				connection.connect();
-				System.out.println("The machine : " + inet.getHostAddress() + " is on ( " + machineNames[i] + " )");
+				// System.out.println("The machine : " + inet.getHostAddress() + " is on ( " + machineNames[i] + " )");
 
 				this.rreq = new ReadInputDiscretesRequest(0, 2);
 				this.transaction = new ModbusTCPTransaction(connection);
 				this.transaction.setRequest(rreq);
 				this.transaction.execute();
 				this.rres = (ReadInputDiscretesResponse) transaction.getResponse();
-				int state = -1;
 
 				if (rres.getDiscreteStatus(0) == false && rres.getDiscreteStatus(1) == false) {
 					state = 1; // Stop
@@ -53,24 +56,27 @@ public class Moxa {
 					state = 3; // Off
 				}
 
-				if (ElasticSearchUtil.getLastStateByMachineID(i + 2) != -1 && state == ElasticSearchUtil.getLastStateByMachineID(i + 2)) {
-					state = -1;
-				}
-
-				if (state != -1) {
-					MachineUpdate update = new MachineUpdate();
-					update.setMachineName(machineNames[i]);
-					update.setMachineID(i + 2); // ID = 1 is for DMG_CTX and ID = 0 isn't attributed
-					update.setState(state);
-					update.setStateLabel(ElasticSearchUtil.getStateLabel(update.getState()));
-					update.setTime(new Timestamp(System.currentTimeMillis()));
-					updates.add(update);
-				}
-
 				connection.close();
 
 			} else {
-				System.out.println("The machine : " + inet.getHostAddress() + " is off ");
+				// System.out.println("The machine : " + inet.getHostAddress() + " is off ");
+				state = 0;
+			}
+
+			if (ElasticSearchUtil.getLastStateByMachineID(i + 2) != -1 && state == ElasticSearchUtil.getLastStateByMachineID(i + 2)) {
+				state = -1;
+			}
+
+			if (state != -1) {
+				MachineUpdate update = new MachineUpdate();
+				update.setMachineName(machineNames[i]);
+				update.setMachineID(i + 2); // ID = 1 is for DMG_CTX and ID = 0 isn't attributed
+				update.setState(state);
+				update.setStateLabel(ElasticSearchUtil.getStateLabel(update.getState()));
+				update.setTime(new Timestamp(System.currentTimeMillis()));
+				updates.add(update);
+				
+				System.out.println("" + inet.getHostAddress() + " set to state " + state + " on " + new Date());
 			}
 		}
 
