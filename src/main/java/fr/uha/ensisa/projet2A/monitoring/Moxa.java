@@ -67,7 +67,8 @@ public class Moxa {
 				state = 0;
 			}
 
-			if (ElasticSearchUtil.getLastStateByMachineID(i + 2) != -1 && state == ElasticSearchUtil.getLastStateByMachineID(i + 2)) {
+			int lastState = ElasticSearchUtil.getLastStateByMachineID(i + 2);
+			if (lastState != -1 && state == lastState) {
 				state = -1;
 			}
 
