@@ -41,10 +41,16 @@ public class Monitoring {
 			System.out.println("Have you started Elasticsearch ?");
 			e.printStackTrace();
 		}
-
+		
 		// Open connection to the DMG SQL Server
 		dmg = new DMG();
-		dmg.openConnection(config.getHostDMGSQL());
+		try{
+			dmg.openConnection(config.getHostDMGSQL());
+			System.out.println("Connected to SQL DMG database");
+		}catch(Exception e) {
+			System.out.println("Connection to SQL DMG host failed");
+			e.printStackTrace();
+		}
 
 		// Indexation
 		ElasticSearchUtil.indexUpdate(dmg.queryDBHistory().get(0));
@@ -59,7 +65,7 @@ public class Monitoring {
 		if (ElasticSearchUtil.isESDatabaseEmpty()) {
 			ElasticSearchUtil.putData(dmg.queryDBHistory().get(1));
 		}
-
+		
 		Runnable dmgRunnable = new Runnable() {
 
 			@Override
@@ -132,10 +138,9 @@ public class Monitoring {
 			}
 		};
 
-		//Pooling 1 sec ? 
 		ScheduledExecutorService monitoringExecutor = Executors.newScheduledThreadPool(2);
-		monitoringExecutor.scheduleAtFixedRate(dmgRunnable, 0, config.getPoolingPeriod(), TimeUnit.SECONDS);
-		monitoringExecutor.scheduleAtFixedRate(moxaRunnable, 0, config.getPoolingPeriod(), TimeUnit.SECONDS);
+		monitoringExecutor.scheduleAtFixedRate(dmgRunnable, 0, config.getDmgPoolingPeriod(), TimeUnit.SECONDS);
+		monitoringExecutor.scheduleAtFixedRate(moxaRunnable, 0, config.getMoxaPoolingPeriod(), TimeUnit.SECONDS);
 
 	}
 }

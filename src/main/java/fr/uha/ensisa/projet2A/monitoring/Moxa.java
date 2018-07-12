@@ -46,14 +46,18 @@ public class Moxa {
 				this.transaction.execute();
 				this.rres = (ReadInputDiscretesResponse) transaction.getResponse();
 
+				/*System.out.println("Sortie 0 :" + rres.getDiscreteStatus(0));
+				System.out.println("Sortie 1 :" + rres.getDiscreteStatus(1));
+				System.out.println("Sortie 2 :" + rres.getDiscreteStatus(2));
+				System.out.println("Sortie 3 :" + rres.getDiscreteStatus(3));
+				*/
+				
 				if (rres.getDiscreteStatus(0) == false && rres.getDiscreteStatus(1) == false) {
-					state = 1; // Stop
-				} else if (rres.getDiscreteStatus(0) == true && rres.getDiscreteStatus(1) == true) {
-					state = 3; // Off
-				} else if (rres.getDiscreteStatus(0) == true && rres.getDiscreteStatus(1) == false) {
-					state = 2; // Run
+					state = 3 ; //Réglage 
 				} else if (rres.getDiscreteStatus(0) == false && rres.getDiscreteStatus(1) == true) {
-					state = 3; // Off
+					state = 2;  //Production
+				} else {
+					state = 1 ; //Arrêt 
 				}
 
 				connection.close();
