@@ -2,3 +2,6 @@
 /bin/
 /target/
 /target/
+/.classpath
+/dependency-reduced-pom.xml
+/root@svn.ensisa.uha.fr
