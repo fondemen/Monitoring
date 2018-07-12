@@ -75,8 +75,6 @@ public class Moxa {
 				update.setStateLabel(ElasticSearchUtil.getStateLabel(update.getState()));
 				update.setTime(new Timestamp(System.currentTimeMillis()));
 				updates.add(update);
-				
-				System.out.println("" + inet.getHostAddress() + " set to state " + state + " on " + new Date());
 			}
 		}
 
