@@ -1,11 +1,16 @@
 package fr.uha.ensisa.projet2A.monitoring;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -66,7 +71,7 @@ public class DMG {
 	 * @return
 	 * @throws SQLException
 	 */
-	public String getLastUpdateTime() throws SQLException {
+	public Instant getLastUpdateTime() throws SQLException {
 
 		String query = "SELECT Time from mdetail where (select max(Id) from mdetail)=Id";
 		this.st = this.connection.prepareStatement(query);
@@ -77,7 +82,7 @@ public class DMG {
 			lastDate = result.getTimestamp("Time",Calendar.getInstance(this.timezone));
 		}
 
-		return lastDate.toString();
+		return Instant.ofEpochMilli(lastDate.getTime());
 	}
 
 	/**
@@ -87,9 +92,12 @@ public class DMG {
 	 * @return
 	 * @throws SQLException
 	 */
-	public ArrayList<MachineUpdate> getUpdatesFromLastDate(String lastESDate) throws SQLException {
+	public ArrayList<MachineUpdate> getUpdatesFromLastDate(Instant lastESDate) throws SQLException {
+		ZonedDateTime start = lastESDate.atZone(ZoneId.of(this.timezone.getID()));
+		String formattedStart = start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+		if (ElasticSearchUtil.verbose) System.out.println("Searching SQL Server for DMX updates since " + formattedStart);
 
-		String query = "SELECT Status , Time from mdetail WHERE Time > \'" + lastESDate + "\'";
+		String query = "SELECT Status , Time from mdetail WHERE Time > \'" + formattedStart + "\'";
 
 		this.st = this.connection.prepareStatement(query);
 		this.result = st.executeQuery();

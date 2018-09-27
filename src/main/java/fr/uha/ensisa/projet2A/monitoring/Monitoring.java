@@ -3,6 +3,7 @@ package fr.uha.ensisa.projet2A.monitoring;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -78,8 +79,8 @@ public class Monitoring {
 			public void run() {
 				try {
 					// Init
-					String lastESDate = ElasticSearchUtil.getLastUpdateTime();
-					String lastSQLDate = dmg.getLastUpdateTime();
+					Instant lastESDate = ElasticSearchUtil.getLastUpdateTime();
+					Instant lastSQLDate = dmg.getLastUpdateTime();
 					
 					if (first) {
 						System.out.println("Recovering DMG history from " + lastESDate + " to " + lastSQLDate);
@@ -94,7 +95,7 @@ public class Monitoring {
 					}
 
 					// DMG
-					if (lastESDate != null && !lastESDate.equals(lastSQLDate)) {
+					if (lastESDate != null && lastESDate.isBefore(lastSQLDate)) {
 						if (verbose) { 
 							 System.out.println("New data from DMG_CTX SQL Server");
 							 System.out.println("****** Loading new data ****** ");

@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
@@ -185,7 +186,7 @@ public class ElasticSearchUtil {
 	 * @throws ExecutionException
 	 * @throws ParseException
 	 */
-	public static String getLastUpdateTime() throws InterruptedException, ExecutionException, ParseException {
+	public static Instant getLastUpdateTime() throws InterruptedException, ExecutionException, ParseException {
 
 		SearchResponse response = client.prepareSearch("update").setTypes("MachineUpdate")
 				.setQuery(QueryBuilders.termsQuery("machineID", "1")).setSize(1).addSort("time", SortOrder.DESC).get();
@@ -200,13 +201,15 @@ public class ElasticSearchUtil {
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"); 
 			Date date = df.parse(last);
 			
-			DateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-			String dateFormatted = outputFormatter.format(date);
+			return Instant.ofEpochMilli(date.getTime());
 			
-			if (verbose) System.out.println("last date before formating = " + dateFormatted);
-			
-			
-			return dateFormatted;
+//			DateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+//			String dateFormatted = outputFormatter.format(date);
+//			
+//			if (verbose) System.out.println("last date before formating = " + dateFormatted);
+//			
+//			
+//			return dateFormatted;
 		}
 
 		return null;
