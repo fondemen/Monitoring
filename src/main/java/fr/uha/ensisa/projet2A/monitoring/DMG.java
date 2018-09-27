@@ -15,13 +15,16 @@ public class DMG {
 	private Connection connection;
 	private PreparedStatement st;
 	private ResultSet result;
+	private TimeZone timezone;
 
-	public DMG() throws ClassNotFoundException {
+	public DMG(TimeZone timezone) throws ClassNotFoundException {
 		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		this.timezone = timezone;
 	}
 
 	/**
 	 * Open the connection with the DMG SQL Server
+	 * @param timezone 
 	 * @throws SQLException 
 	 */
 	public void openConnection(String url) throws SQLException {
@@ -48,7 +51,7 @@ public class DMG {
 			update.setMachineName("DMG_CTX");
 			update.setState(ElasticSearchUtil.getStateByLabel(result.getString("Status")));
 			update.setStateLabel(result.getString("Status"));
-			update.setTime(result.getTimestamp("Time"));
+			update.setTime(result.getTimestamp("Time",Calendar.getInstance(this.timezone)));
 
 			updates.add(update);
 		}
@@ -71,7 +74,7 @@ public class DMG {
 
 		Timestamp lastDate = null;
 		while (this.result.next()) {
-			lastDate = result.getTimestamp("Time",Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+			lastDate = result.getTimestamp("Time",Calendar.getInstance(this.timezone));
 		}
 
 		return lastDate.toString();
@@ -98,7 +101,7 @@ public class DMG {
 			update.setMachineName("DMG_CTX");
 			update.setState(ElasticSearchUtil.getStateByLabel(result.getString("Status")));
 			update.setStateLabel(result.getString("Status"));
-			update.setTime(result.getTimestamp("Time",Calendar.getInstance(TimeZone.getTimeZone("UTC"))));
+			update.setTime(result.getTimestamp("Time",Calendar.getInstance(this.timezone)));
 			updates.add(update);
 		}
 

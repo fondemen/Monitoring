@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,7 +27,7 @@ public class DMGTest {
 	@BeforeClass
 	public static void setUp() throws Throwable {
 		Connection con = null;
-		dmg = new DMG();
+		dmg = new DMG(TimeZone.getDefault());
 		int re = 0;
 		try {
 			Class.forName("org.hsqldb.jdbc.JDBCDriver");

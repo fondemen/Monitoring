@@ -3,8 +3,16 @@ package fr.uha.ensisa.projet2A.monitoring;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
+import java.lang.reflect.Type;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 
 public class MonitoringConfiguration {
 
@@ -17,6 +25,7 @@ public class MonitoringConfiguration {
 	private int moxaPort;
 	private int moxaPoolingPeriod;
 	private int dmgPoolingPeriod;
+	private TimeZone dmgTimezone;
 
 	/**
 	 * Default constructor, use not recommended 
@@ -31,6 +40,7 @@ public class MonitoringConfiguration {
 		this.moxaPort = 8080;
 		this.moxaPoolingPeriod = 1;
 		this.dmgPoolingPeriod = 5;	
+		this.dmgTimezone = TimeZone.getDefault();
 	}
 
 	/**
@@ -42,7 +52,7 @@ public class MonitoringConfiguration {
 	 * @param hostDMGSQL
 	 */
 	public MonitoringConfiguration(String clusterNameES, String hostES, int portES, String hostDMGSQL, String[] IPs,
-			String[] machineNames, int moxaPort, int moxaPoolingPeriod, int dmgPoolingPeriod) {
+			String[] machineNames, int moxaPort, int moxaPoolingPeriod, int dmgPoolingPeriod, String dmgTimezone) {
 
 		this.clusterNameES = clusterNameES;
 		this.hostES = hostES;
@@ -53,6 +63,7 @@ public class MonitoringConfiguration {
 		this.moxaPort = moxaPort;
 		this.moxaPoolingPeriod = moxaPoolingPeriod;
 		this.dmgPoolingPeriod = dmgPoolingPeriod;
+		this.setDmgTimezone(dmgTimezone);
 
 		System.out.println("Configuration initialized");
 	}
@@ -67,8 +78,18 @@ public class MonitoringConfiguration {
 	public MonitoringConfiguration(String pathToJsonFile) throws FileNotFoundException {
 		
 		Reader reader = new FileReader(pathToJsonFile);
-		Gson gson = new Gson();
-		MonitoringConfiguration config = gson.fromJson(reader, MonitoringConfiguration.class);
+		Gson gson = new GsonBuilder()
+				.registerTypeAdapter(TimeZone.class, new JsonDeserializer<TimeZone>() {
+
+					@Override
+					public TimeZone deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+							throws JsonParseException {
+						return TimeZone.getTimeZone(json.getAsString());
+					}
+				})
+				.create();
+		MonitoringConfiguration config = gson
+				.fromJson(reader, MonitoringConfiguration.class);
 
 		this.setClusterNameES(config.getClusterNameES());
 		this.setHostDMGSQL(config.getHostDMGSQL());
@@ -79,6 +100,7 @@ public class MonitoringConfiguration {
 		this.setMoxaPort(config.getMoxaPort());
 		this.setDmgPoolingPeriod(config.getDmgPoolingPeriod());
 		this.setMoxaPoolingPeriod(config.getMoxaPoolingPeriod());
+		this.setDmgTimezone(config.getDmgTimezone());
 
 		System.out.println("Configuration initialized");
 
@@ -156,6 +178,18 @@ public class MonitoringConfiguration {
 		this.moxaPoolingPeriod = moxaPoolingPeriod;
 	}
 
+	public TimeZone getDmgTimezone() {
+		return dmgTimezone;
+	}
+
+	public void setDmgTimezone(String dmgTimezone) {
+		this.dmgTimezone = TimeZone.getTimeZone(dmgTimezone == null ? "UTC" : dmgTimezone);
+	}
+
+	public void setDmgTimezone(TimeZone dmgTimezone) {
+		this.dmgTimezone = dmgTimezone;
+	}
+
 	@Override
 	public String toString() {
 
@@ -170,6 +204,7 @@ public class MonitoringConfiguration {
 		tmp.append("Moxa port = " + this.moxaPort + "\n");
 		tmp.append("Moxa pooling period = " + this.moxaPoolingPeriod + "\n");
 		tmp.append("DMG pooling period = " + this.dmgPoolingPeriod + "\n");
+		tmp.append("DMG timezone = " + this.dmgTimezone.getID() + "\n");
 		tmp.append("**** End of configuration ****");
 
 		return tmp.toString();

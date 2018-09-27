@@ -43,7 +43,7 @@ public class Monitoring {
 		}
 		
 		// Open connection to the DMG SQL Server
-		dmg = new DMG();
+		dmg = new DMG(config.getDmgTimezone());
 		try{
 			dmg.openConnection(config.getHostDMGSQL());
 			System.out.println("Connected to SQL DMG database");

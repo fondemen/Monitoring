@@ -19,7 +19,7 @@ public class MonitoringConfigurationTest {
 	public void create() {
 		String[] IPs = { "demeterIP", "haas1IP", "haas2IP", "haas3IP", };
 		String[] machineNames = { "Demeter", "HAAS_VF2_5AXES", "HAAS_VF2_3AXES", "HAAS_SL20" };
-		sut = new MonitoringConfiguration("clusterName", "localhost", 9200, "bdd", IPs, machineNames, 8080, 1, 5);
+		sut = new MonitoringConfiguration("clusterName", "localhost", 9200, "bdd", IPs, machineNames, 8080, 1, 5, "UTC");
 	}
 
 	@Test
@@ -76,7 +76,8 @@ public class MonitoringConfigurationTest {
 				+ "Elasticsearch host = localhost\n" + "Elasticsearch port = 9200\n" + "DMG SQL server host  = bdd\n"
 				+ "Machine : Demeter , IP = demeterIP\n" + "Machine : HAAS_VF2_5AXES , IP = haas1IP\n"
 				+ "Machine : HAAS_VF2_3AXES , IP = haas2IP\n" + "Machine : HAAS_SL20 , IP = haas3IP\n"
-				+ "Moxa port = 8080\n" +"Moxa pooling period = 1\n" +"DMG pooling period = 5\n" + "**** End of configuration ****";
+				+ "Moxa port = 8080\n" +"Moxa pooling period = 1\n" +"DMG pooling period = 5\n" +"DMG timezone = UTC\n"
+				+ "**** End of configuration ****";
 
 		assertEquals(printed, sut.toString());
 	}
@@ -105,6 +106,7 @@ public class MonitoringConfigurationTest {
 		assertEquals(sut.getMoxaPort(), 8080);
 		assertEquals(sut.getMoxaPoolingPeriod(), 1);
 		assertEquals(sut.getDmgPoolingPeriod(), 5);
+		assertEquals(sut.getDmgTimezone().getID(), "Europe/Paris");
 	}
 
 	@Test(expected = java.lang.NullPointerException.class)

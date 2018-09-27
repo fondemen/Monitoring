@@ -7,5 +7,6 @@
 "IPs": [ "IP1", "IP2" ],
 "moxaPort":8080,
 "dmgPoolingPeriod":5,
-"moxaPoolingPeriod":1
+"moxaPoolingPeriod":1,
+"dmgTimezone":"Europe/Paris"
 }
