@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import com.google.gson.Gson;
@@ -16,6 +15,7 @@ import com.google.gson.JsonParseException;
 
 public class MonitoringConfiguration {
 
+	private boolean verbose;
 	private String clusterNameES;
 	private String hostES;
 	private int portES;
@@ -31,6 +31,7 @@ public class MonitoringConfiguration {
 	 * Default constructor, use not recommended 
 	 */
 	public MonitoringConfiguration() {
+		this.verbose = false;
 		this.clusterNameES = "elasticsearch";
 		this.hostES = "localhost";
 		this.portES = 9300;
@@ -51,9 +52,9 @@ public class MonitoringConfiguration {
 	 * @param portES
 	 * @param hostDMGSQL
 	 */
-	public MonitoringConfiguration(String clusterNameES, String hostES, int portES, String hostDMGSQL, String[] IPs,
+	public MonitoringConfiguration(boolean verbose, String clusterNameES, String hostES, int portES, String hostDMGSQL, String[] IPs,
 			String[] machineNames, int moxaPort, int moxaPoolingPeriod, int dmgPoolingPeriod, String dmgTimezone) {
-
+		this.verbose = verbose;
 		this.clusterNameES = clusterNameES;
 		this.hostES = hostES;
 		this.portES = portES;
@@ -91,6 +92,7 @@ public class MonitoringConfiguration {
 		MonitoringConfiguration config = gson
 				.fromJson(reader, MonitoringConfiguration.class);
 
+		this.setVerbose(config.isVerbose());
 		this.setClusterNameES(config.getClusterNameES());
 		this.setHostDMGSQL(config.getHostDMGSQL());
 		this.setHostES(config.getHostES());
@@ -104,6 +106,14 @@ public class MonitoringConfiguration {
 
 		System.out.println("Configuration initialized");
 
+	}
+
+	public boolean isVerbose() {
+		return verbose;
+	}
+
+	public void setVerbose(boolean verbose) {
+		this.verbose = verbose;
 	}
 
 	public String getClusterNameES() {
@@ -194,6 +204,7 @@ public class MonitoringConfiguration {
 	public String toString() {
 
 		StringBuilder tmp = new StringBuilder("**** Monitoring configuration : ****\n");
+		if (this.isVerbose()) tmp.append("Verbose mode = enabled\\n");
 		tmp.append("Elasticsearch cluster name = " + this.clusterNameES + "\n");
 		tmp.append("Elasticsearch host = " + this.hostES + "\n");
 		tmp.append("Elasticsearch port = " + this.portES + "\n");

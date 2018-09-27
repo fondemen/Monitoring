@@ -1,9 +1,10 @@
 package fr.uha.ensisa.projet2A.monitoring;
 
+import static fr.uha.ensisa.projet2A.monitoring.ElasticSearchUtil.verbose;
+
 import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 
 import net.wimpi.modbus.io.ModbusTCPTransaction;
 import net.wimpi.modbus.msg.ReadInputDiscretesRequest;
@@ -38,7 +39,7 @@ public class Moxa {
 				connection = new TCPMasterConnection(inet);
 				connection.setPort(port);
 				connection.connect();
-				// System.out.println("The machine : " + inet.getHostAddress() + " is on ( " + machineNames[i] + " )");
+				if (verbose) System.out.println("The machine : " + inet.getHostAddress() + " is on ( " + machineNames[i] + " )");
 
 				this.rreq = new ReadInputDiscretesRequest(0, 2);
 				this.transaction = new ModbusTCPTransaction(connection);
@@ -46,11 +47,12 @@ public class Moxa {
 				this.transaction.execute();
 				this.rres = (ReadInputDiscretesResponse) transaction.getResponse();
 
-				/*System.out.println("Sortie 0 :" + rres.getDiscreteStatus(0));
-				System.out.println("Sortie 1 :" + rres.getDiscreteStatus(1));
-				System.out.println("Sortie 2 :" + rres.getDiscreteStatus(2));
-				System.out.println("Sortie 3 :" + rres.getDiscreteStatus(3));
-				*/
+				if (verbose) {
+					System.out.println("Sortie 0 :" + rres.getDiscreteStatus(0));
+					System.out.println("Sortie 1 :" + rres.getDiscreteStatus(1));
+					System.out.println("Sortie 2 :" + rres.getDiscreteStatus(2));
+					System.out.println("Sortie 3 :" + rres.getDiscreteStatus(3));
+				}
 				
 				if (rres.getDiscreteStatus(0) == false && rres.getDiscreteStatus(1) == false) {
 					state = 3 ; //Réglage 
@@ -63,7 +65,7 @@ public class Moxa {
 				connection.close();
 
 			} else {
-				// System.out.println("The machine : " + inet.getHostAddress() + " is off ");
+				if (verbose) System.out.println("The machine : " + inet.getHostAddress() + " is off ");
 				state = 0;
 			}
 

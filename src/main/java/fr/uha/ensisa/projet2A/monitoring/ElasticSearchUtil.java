@@ -25,6 +25,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 
 public class ElasticSearchUtil {
 
+	static boolean verbose;
 	private static Client client;
 
 	/**
@@ -194,7 +195,7 @@ public class ElasticSearchUtil {
 			// Change of the date format from "yyyy-MM-dd'T'HH:mm:ss.SSSX" to
 			// "yyyy-MM-dd HH:mm:ss.S"
 			
-			// System.out.println("last date before formating = " + last);
+			if (verbose) System.out.println("last date before formating = " + last);
 			
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"); 
 			Date date = df.parse(last);
@@ -202,7 +203,7 @@ public class ElasticSearchUtil {
 			DateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
 			String dateFormatted = outputFormatter.format(date);
 			
-			// System.out.println("last date before formating = " + dateFormatted);
+			if (verbose) System.out.println("last date before formating = " + dateFormatted);
 			
 			
 			return dateFormatted;

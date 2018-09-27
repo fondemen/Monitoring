@@ -19,7 +19,7 @@ public class MonitoringConfigurationTest {
 	public void create() {
 		String[] IPs = { "demeterIP", "haas1IP", "haas2IP", "haas3IP", };
 		String[] machineNames = { "Demeter", "HAAS_VF2_5AXES", "HAAS_VF2_3AXES", "HAAS_SL20" };
-		sut = new MonitoringConfiguration("clusterName", "localhost", 9200, "bdd", IPs, machineNames, 8080, 1, 5, "UTC");
+		sut = new MonitoringConfiguration(false, "clusterName", "localhost", 9200, "bdd", IPs, machineNames, 8080, 1, 5, "UTC");
 	}
 
 	@Test
@@ -94,6 +94,8 @@ public class MonitoringConfigurationTest {
 		sut = new MonitoringConfiguration(file.getAbsolutePath());
 		String machineNames[] = { "machine1", "machine2" };
 		String IPs[] = { "IP1", "IP2" };
+		
+		assertEquals(sut.isVerbose(), true);
 
 		assertEquals(sut.getClusterNameES(), "elasticsearch");
 		assertEquals(sut.getHostES(), "localhost");

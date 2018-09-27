@@ -33,6 +33,9 @@ public class Monitoring {
 			System.out.println("Cannot read/parse txt file : " + configFilePath);
 			System.exit(0);
 		}
+		
+		final boolean verbose = config.isVerbose();
+		ElasticSearchUtil.verbose = verbose;
 
 		// Initialization of ES connection
 		try {
@@ -85,13 +88,17 @@ public class Monitoring {
 					
 					int i = 0;
 
-					// System.out.println("lastESDate = " + lastESDate);
-					// System.out.println("lastSQLDate = " + lastSQLDate);
+					if (verbose) { 
+						 System.out.println("lastESDate = " + lastESDate);
+						 System.out.println("lastSQLDate = " + lastSQLDate);
+					}
 
 					// DMG
 					if (lastESDate != null && !lastESDate.equals(lastSQLDate)) {
-						// System.out.println("New data from DMG_CTX SQL Server");
-						// System.out.println("****** Loading new data ****** ");
+						if (verbose) { 
+							 System.out.println("New data from DMG_CTX SQL Server");
+							 System.out.println("****** Loading new data ****** ");
+						}
 						for (MachineUpdate update : dmg.getUpdatesFromLastDate(lastESDate)) {
 							ElasticSearchUtil.putData(update);
 							System.out.println(update);
@@ -99,10 +106,12 @@ public class Monitoring {
 						}
 					}
 
-					if (i == 0) {
-						// System.out.println("****** No data from the DMG CTX SQL server ******");
-					} else {
-						// System.out.println("******" + i + " update(s) charged from the DMG CTX SQL server  ******");
+					if (verbose) {
+						if (i == 0) {
+							System.out.println("****** No data from the DMG CTX SQL server ******");
+						} else {
+							System.out.println("******" + i + " update(s) charged from the DMG CTX SQL server  ******");
+						}
 					}
 
 				} catch (InterruptedException | ExecutionException | ParseException | SQLException | IOException e) {
@@ -127,8 +136,10 @@ public class Monitoring {
 					int i = 0;
 					ArrayList<MachineUpdate> updates = moxa.pooling(IPs, machineNames, moxaPort);
 					if (!updates.isEmpty()) {
-						// System.out.println("New data from machines connected with a Moxa");
-						// System.out.println("****** Loading new data ****** ");
+						if (verbose) {
+							System.out.println("New data from machines connected with a Moxa");
+							System.out.println("****** Loading new data ****** ");
+						}
 						for (MachineUpdate update : updates) {
 							ElasticSearchUtil.putData(update);
 							System.out.println(update);
@@ -136,7 +147,7 @@ public class Monitoring {
 						}
 					}
 					if (i == 0) {
-						// System.out.println("****** No data from machines connected with a moxa ******");
+						if (verbose) System.out.println("****** No data from machines connected with a moxa ******");
 					} else {
 						System.out.println("******" + i + " update(s) charged from machines connected with a moxa ******");
 					}

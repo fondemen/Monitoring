@@ -8,5 +8,6 @@
 "moxaPort":8080,
 "dmgPoolingPeriod":5,
 "moxaPoolingPeriod":1,
-"dmgTimezone":"Europe/Paris"
+"dmgTimezone":"Europe/Paris",
+"verbose":true
 }
