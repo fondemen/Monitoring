@@ -204,7 +204,7 @@ public class MonitoringConfiguration {
 	public String toString() {
 
 		StringBuilder tmp = new StringBuilder("**** Monitoring configuration : ****\n");
-		if (this.isVerbose()) tmp.append("Verbose mode = enabled\\n");
+		if (this.isVerbose()) tmp.append("Verbose mode = enabled\n");
 		tmp.append("Elasticsearch cluster name = " + this.clusterNameES + "\n");
 		tmp.append("Elasticsearch host = " + this.hostES + "\n");
 		tmp.append("Elasticsearch port = " + this.portES + "\n");
