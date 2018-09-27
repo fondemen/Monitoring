@@ -62,11 +62,14 @@ public class Monitoring {
 		final int moxaPort = config.getMoxaPort();
 
 		// Add of a first element into ES database
-		if (ElasticSearchUtil.isESDatabaseEmpty()) {
+		if (ElasticSearchUtil.getLastUpdateTime() == null) {
+			System.out.println("No DMG history found");
 			ElasticSearchUtil.putData(dmg.queryDBHistory().get(1));
 		}
 		
 		Runnable dmgRunnable = new Runnable() {
+			
+			private boolean first = true;
 
 			@Override
 			public void run() {
@@ -74,6 +77,12 @@ public class Monitoring {
 					// Init
 					String lastESDate = ElasticSearchUtil.getLastUpdateTime();
 					String lastSQLDate = dmg.getLastUpdateTime();
+					
+					if (first) {
+						System.out.println("Recovering DMG history from " + lastESDate + " to " + lastSQLDate);
+						first = false;
+					}
+					
 					int i = 0;
 
 					// System.out.println("lastESDate = " + lastESDate);
