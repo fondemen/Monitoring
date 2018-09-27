@@ -6,6 +6,8 @@
 # Monitoring
 Monitoring of the ENSISA mechanics workshop developed with Java, ElasticSearch and Grafana.
 
+This is a maintenance release of [Ahp06/Monitoring](https://github.com/Ahp06/Monitoring) developed by MM. Huynh-Phuc, Devie and Bendahi.
+
 # Manual installation 
 
 1 - To install ElasticSearch from the following link : https://www.elastic.co/fr/downloads/elasticsearch .
