@@ -8,6 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.TimeZone;
 
@@ -16,18 +20,19 @@ import org.junit.Test;
 
 public class DMGTest {
 
+	private static final ZoneId UTC = ZoneId.of("UTC");
 	private static DMG dmg;
 	private static ResultSet result;
 	private static PreparedStatement statement;
 	private static Statement stmt;
 
-	private Timestamp timestamp = java.sql.Timestamp.valueOf("2017-05-23 15:57:14.853");
-	private Timestamp timestamp2 = java.sql.Timestamp.valueOf("2017-05-24 16:00:15.853");
+	private Timestamp timestamp = java.sql.Timestamp.from(Instant.parse("2017-05-23T15:57:14.853Z"));
+	private Timestamp timestamp2 = java.sql.Timestamp.from(Instant.parse("2017-05-24T16:00:15.853Z"));
 
 	@BeforeClass
 	public static void setUp() throws Throwable {
 		Connection con = null;
-		dmg = new DMG(TimeZone.getDefault());
+		dmg = new DMG(UTC);
 		int re = 0;
 		try {
 			Class.forName("org.hsqldb.jdbc.JDBCDriver");

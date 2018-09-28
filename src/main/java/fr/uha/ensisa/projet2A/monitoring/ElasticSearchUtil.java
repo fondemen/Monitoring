@@ -3,11 +3,14 @@ package fr.uha.ensisa.projet2A.monitoring;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -27,6 +30,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 public class ElasticSearchUtil {
 
 	static boolean verbose;
+	static ZoneId zone;
 	private static Client client;
 
 	/**
@@ -151,6 +155,38 @@ public class ElasticSearchUtil {
 
 	}
 
+	public static MachineUpdate getLastUpdate(int machineID) throws InterruptedException, ExecutionException, ParseException {
+
+		try {
+			SearchResponse response = client.prepareSearch("update").setTypes("MachineUpdate")
+					.setQuery(QueryBuilders.termsQuery("machineID", Integer.toString(machineID))).setSize(1).addSort("time", SortOrder.DESC).get();
+			SearchHits hits = response.getHits();
+			if (hits.getTotalHits() != 0) {
+				Map<String, Object> hit = hits.getAt(0).getSourceAsMap();
+				
+				MachineUpdate ret = new MachineUpdate();
+				ret.setMachineID(machineID);
+	
+				ret.setState(Integer.parseInt(hit.get("state").toString()));
+				ret.setStateLabel(hit.get("stateLabel").toString());
+				ret.setMachineName(hit.get("machineName").toString());
+				
+				String lastTime = hit.get("time").toString();
+				// Change of the date format from "yyyy-MM-dd'T'HH:mm:ss.SSSX" to
+				// "yyyy-MM-dd HH:mm:ss.S"
+				//DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"); 
+				ret.setTime(Timestamp.from(Instant.parse(lastTime)));
+				
+				return ret;
+			}
+		} catch (Exception x) {
+			x.printStackTrace();
+		}
+
+		return null;
+
+	}
+	
 	/**
 	 * Delete an index by name
 	 * 
@@ -175,69 +211,6 @@ public class ElasticSearchUtil {
 		long hitsCount = hits.getTotalHits();
 
 		return hitsCount == 0;
-	}
-
-	/**
-	 * Only for the DMG CTX. Return the timestamp string representation of the last
-	 * modification into the database
-	 * 
-	 * @return
-	 * @throws InterruptedException
-	 * @throws ExecutionException
-	 * @throws ParseException
-	 */
-	public static Instant getLastUpdateTime() throws InterruptedException, ExecutionException, ParseException {
-
-		SearchResponse response = client.prepareSearch("update").setTypes("MachineUpdate")
-				.setQuery(QueryBuilders.termsQuery("machineID", "1")).setSize(1).addSort("time", SortOrder.DESC).get();
-		SearchHits hits = response.getHits();
-		if (hits.getTotalHits() != 0) {
-			String last = hits.getAt(0).getSourceAsMap().get("time").toString();
-			// Change of the date format from "yyyy-MM-dd'T'HH:mm:ss.SSSX" to
-			// "yyyy-MM-dd HH:mm:ss.S"
-			
-			if (verbose) System.out.println("last date before formating = " + last);
-			
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"); 
-			Date date = df.parse(last);
-			
-			return Instant.ofEpochMilli(date.getTime());
-			
-//			DateFormat outputFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-//			String dateFormatted = outputFormatter.format(date);
-//			
-//			if (verbose) System.out.println("last date before formating = " + dateFormatted);
-//			
-//			
-//			return dateFormatted;
-		}
-
-		return null;
-
-	}
-
-	/**
-	 * Only for machines connected with a Moxa. Return the last machine state by his
-	 * ID
-	 * 
-	 * @param update
-	 * @return
-	 */
-	public static int getLastStateByMachineID(int machineID) {
-
-		try {
-			SearchResponse response = client.prepareSearch("update").setTypes("MachineUpdate")
-					.setQuery(QueryBuilders.termsQuery("machineID", Integer.toString(machineID))).setSize(1)
-					.addSort("time", SortOrder.DESC).get();
-			SearchHits hits = response.getHits();
-			String lastState = hits.getAt(0).getSourceAsMap().get("state").toString();
-
-			return Integer.parseInt(lastState);
-
-		} catch (Exception e) {
-			return -1;
-		}
-
 	}
 
 	public static Client getClient() {

@@ -4,6 +4,11 @@ import static fr.uha.ensisa.projet2A.monitoring.ElasticSearchUtil.verbose;
 
 import java.net.InetAddress;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import net.wimpi.modbus.io.ModbusTCPTransaction;
@@ -12,6 +17,8 @@ import net.wimpi.modbus.msg.ReadInputDiscretesResponse;
 import net.wimpi.modbus.net.TCPMasterConnection;
 
 public class Moxa {
+	
+	ZoneId zone = ZoneId.systemDefault();
 
 	private TCPMasterConnection connection = null;
 	private ModbusTCPTransaction transaction = null;
@@ -29,6 +36,10 @@ public class Moxa {
 	public ArrayList<MachineUpdate> pooling(String[] IPs, String[] machineNames, int port) throws Exception {
 
 		ArrayList<MachineUpdate> updates = new ArrayList<MachineUpdate>();
+		
+		Instant today = ZonedDateTime.of(LocalDate.now(zone), LocalTime.of(0, 0), zone).toInstant();
+		if (ElasticSearchUtil.verbose) System.out.println("today is " + today);
+		
 		for (int i = 0; i < IPs.length; i++) {
 			InetAddress inet = InetAddress.getByName(IPs[i]);
 			
@@ -68,10 +79,18 @@ public class Moxa {
 				if (verbose) System.out.println("The machine : " + inet.getHostAddress() + " is off ");
 				state = 0;
 			}
-
-			int lastState = ElasticSearchUtil.getLastStateByMachineID(i + 2);
-			if (lastState != -1 && state == lastState) {
+			
+			MachineUpdate lastUpdate = ElasticSearchUtil.getLastUpdate(i+2);
+			if (lastUpdate == null || lastUpdate.getTime().toInstant().isBefore(today)) {
+				if (ElasticSearchUtil.verbose) System.out.println("Inserting previous state as day changed for " + machineNames[i] + 
+						(lastUpdate == null ? "no previous state found" : (" last state found on " + lastUpdate.getTime().toInstant())));
+				// We should write it in the DB
+			} else if (lastUpdate.getState() == state) {
+				// No need to write that to the DB (state didn't change)
+				if (ElasticSearchUtil.verbose) System.out.println("Non need to insert new state " + machineNames[i]);
 				state = -1;
+			} else {
+				if (ElasticSearchUtil.verbose) System.out.println("New state found for " + machineNames[i]);
 			}
 
 			if (state != -1) {

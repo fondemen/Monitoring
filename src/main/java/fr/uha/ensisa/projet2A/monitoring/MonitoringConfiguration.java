@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.time.ZoneId;
 import java.util.TimeZone;
 
 import com.google.gson.Gson;
@@ -25,7 +26,7 @@ public class MonitoringConfiguration {
 	private int moxaPort;
 	private int moxaPoolingPeriod;
 	private int dmgPoolingPeriod;
-	private TimeZone dmgTimezone;
+	private ZoneId dmgTimezone;
 
 	/**
 	 * Default constructor, use not recommended 
@@ -41,7 +42,7 @@ public class MonitoringConfiguration {
 		this.moxaPort = 8080;
 		this.moxaPoolingPeriod = 1;
 		this.dmgPoolingPeriod = 5;	
-		this.dmgTimezone = TimeZone.getDefault();
+		this.dmgTimezone = ZoneId.systemDefault();
 	}
 
 	/**
@@ -80,12 +81,12 @@ public class MonitoringConfiguration {
 		
 		Reader reader = new FileReader(pathToJsonFile);
 		Gson gson = new GsonBuilder()
-				.registerTypeAdapter(TimeZone.class, new JsonDeserializer<TimeZone>() {
+				.registerTypeAdapter(ZoneId.class, new JsonDeserializer<ZoneId>() {
 
 					@Override
-					public TimeZone deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+					public ZoneId deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 							throws JsonParseException {
-						return TimeZone.getTimeZone(json.getAsString());
+						return ZoneId.of(json.getAsString());
 					}
 				})
 				.create();
@@ -188,15 +189,15 @@ public class MonitoringConfiguration {
 		this.moxaPoolingPeriod = moxaPoolingPeriod;
 	}
 
-	public TimeZone getDmgTimezone() {
+	public ZoneId getDmgTimezone() {
 		return dmgTimezone;
 	}
 
 	public void setDmgTimezone(String dmgTimezone) {
-		this.dmgTimezone = TimeZone.getTimeZone(dmgTimezone == null ? "UTC" : dmgTimezone);
+		this.dmgTimezone = dmgTimezone == null ? ZoneId.systemDefault() : ZoneId.of(dmgTimezone);
 	}
 
-	public void setDmgTimezone(TimeZone dmgTimezone) {
+	public void setDmgTimezone(ZoneId dmgTimezone) {
 		this.dmgTimezone = dmgTimezone;
 	}
 
@@ -215,7 +216,7 @@ public class MonitoringConfiguration {
 		tmp.append("Moxa port = " + this.moxaPort + "\n");
 		tmp.append("Moxa pooling period = " + this.moxaPoolingPeriod + "\n");
 		tmp.append("DMG pooling period = " + this.dmgPoolingPeriod + "\n");
-		tmp.append("DMG timezone = " + this.dmgTimezone.getID() + "\n");
+		tmp.append("DMG timezone = " + this.dmgTimezone.getId() + "\n");
 		tmp.append("**** End of configuration ****");
 
 		return tmp.toString();

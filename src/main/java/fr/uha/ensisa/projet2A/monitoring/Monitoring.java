@@ -61,12 +61,13 @@ public class Monitoring {
 
 		// Open connection to the machines Moxa
 		moxa = new Moxa();
+		moxa.zone = config.getDmgTimezone();
 		final String[] IPs = config.getIPs();
 		final String[] machineNames = config.getMachineNames();
 		final int moxaPort = config.getMoxaPort();
 
 		// Add of a first element into ES database
-		if (ElasticSearchUtil.getLastUpdateTime() == null) {
+		if (ElasticSearchUtil.getLastUpdate(1 /* DMG is hardcoded to 1 */) == null) {
 			System.out.println("No DMG history found");
 			ElasticSearchUtil.putData(dmg.queryDBHistory().get(1));
 		}
@@ -79,7 +80,8 @@ public class Monitoring {
 			public void run() {
 				try {
 					// Init
-					Instant lastESDate = ElasticSearchUtil.getLastUpdateTime();
+					MachineUpdate lastUpdate = ElasticSearchUtil.getLastUpdate(1);
+					Instant lastESDate = lastUpdate == null ? null : lastUpdate.getTime().toInstant();
 					Instant lastSQLDate = dmg.getLastUpdateTime();
 					
 					if (first) {
@@ -154,7 +156,7 @@ public class Monitoring {
 					}
 
 				} catch (Exception e) {
-
+					if (verbose) e.printStackTrace();
 				}
 			}
 		};

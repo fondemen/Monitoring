@@ -1,7 +1,6 @@
 package fr.uha.ensisa.projet2A.monitoring;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,15 +15,17 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 public class DMG {
+	private final ZoneId zone;
+	private final TimeZone timezone;
 
 	private Connection connection;
 	private PreparedStatement st;
 	private ResultSet result;
-	private TimeZone timezone;
 
-	public DMG(TimeZone timezone) throws ClassNotFoundException {
+	public DMG(ZoneId zone) throws ClassNotFoundException {
 		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-		this.timezone = timezone;
+		this.zone = zone;
+		this.timezone = TimeZone.getTimeZone(zone.getId());
 	}
 
 	/**
@@ -93,7 +94,7 @@ public class DMG {
 	 * @throws SQLException
 	 */
 	public ArrayList<MachineUpdate> getUpdatesFromLastDate(Instant lastESDate) throws SQLException {
-		ZonedDateTime start = lastESDate.atZone(ZoneId.of(this.timezone.getID()));
+		ZonedDateTime start = lastESDate.atZone(this.zone);
 		String formattedStart = start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
 		if (ElasticSearchUtil.verbose) System.out.println("Searching SQL Server for DMX updates since " + formattedStart);
 

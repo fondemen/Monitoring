@@ -108,7 +108,7 @@ public class MonitoringConfigurationTest {
 		assertEquals(sut.getMoxaPort(), 8080);
 		assertEquals(sut.getMoxaPoolingPeriod(), 1);
 		assertEquals(sut.getDmgPoolingPeriod(), 5);
-		assertEquals(sut.getDmgTimezone().getID(), "Europe/Paris");
+		assertEquals(sut.getDmgTimezone().getId(), "Europe/Paris");
 	}
 
 	@Test(expected = java.lang.NullPointerException.class)
